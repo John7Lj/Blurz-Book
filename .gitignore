@@ -1,0 +1,7 @@
+.env
+.pytest_cache
+.notes
+__pycache__
+migration/__pycache__
+migration/versions/__pycache__
+first lesson
