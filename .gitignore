@@ -5,3 +5,5 @@ __pycache__
 migration/__pycache__
 migration/versions/__pycache__
 first lesson
+client/node_modules
+client/.env

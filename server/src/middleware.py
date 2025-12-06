@@ -3,7 +3,7 @@ from fastapi.requests import Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 import time 
-import logging
+
 
 """simple middleware type one"""
 
@@ -12,7 +12,6 @@ import logging
  # , cors origins and prevent host attack  , Rate lImiting , 
  
 def custome_simple_middle(app:FastAPI):
-    logging.disable = True
     
     @app.middleware('http')
     
@@ -33,19 +32,13 @@ def custome_simple_middle(app:FastAPI):
     
     app.add_middleware(
     CORSMiddleware,
-    allow_origins= ['127.0.0.0'] ,
+    allow_origins= ['*'] ,
     allow_methods=['GET','POST','PATCH','DELETE'],
     allow_headers=['*'],
     allow_credentials = True,
        
     )
     
-    
-    app.add_middleware(
-        TrustedHostMiddleware ,
-        allowed_hosts=["localhost", "127.0.0.1"],
-
-    )
     
     
         

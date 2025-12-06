@@ -8,11 +8,27 @@ from src.err import UserAlreadyExists,UserAlreadyVerify,UserNotFound
 import logging
 class User_Service:
 
+    # In your User_Service class, update get_user_by_email method:
+
     async def get_user_by_email(self, email: str, session: AsyncSession):
+        # ADD DEBUG LOGS
+        print(f"🔎 SEARCHING FOR USER:")
+        print(f"   Looking for email: '{email}'")
+        print(f"   Email stripped: '{email.strip()}'")
+        
+        # Try with stripped email
+        email = email.strip().lower()  # Strip whitespace and lowercase
+        print(f"   Normalized email: '{email}'")
+        
         statement = select(User_Model).where(User_Model.email == email)
-        result = await session.exec(statement)
-        user = result.first()
-        return user 
+        result = await session.execute(statement)
+        user = result.scalar_one_or_none()
+        
+        print(f"   User found: {user is not None}")
+        if user:
+            print(f"   Found: {user.email}")
+        
+        return user
 
 
     async def user_exist(self, email: str, session: AsyncSession):

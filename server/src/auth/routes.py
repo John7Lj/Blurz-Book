@@ -94,7 +94,7 @@ async def activation_user(token:str,session:AsyncSession=Depends(get_session),ac
     
     data = email_verification_link.de_serializ_url(token)
     
-    if check_blacklist(data['token_id']):
+    if await check_blacklist(data['token_id']):
         raise UserAlreadyVerify()
     
     email = data['email']
@@ -117,57 +117,63 @@ async def activation_user(token:str,session:AsyncSession=Depends(get_session),ac
 @auth_router.post('/login',)
 async def login_user(user_data:Login_User,session:AsyncSession=Depends(get_session)):
     user_data_login = user_data
-    email = user_data_login.email   # notice here we didn't access as a dictinary cause it still in the pydasntic model object not converted to json model 
-    password = user_data_login.password 
+    email = user_data_login.email
+    password = user_data_login.password
+    
+    # ADD THESE DEBUG LOGS
+    print(f"🔍 LOGIN ATTEMPT:")
+    print(f"   Email received: {email}")
+    print(f"   Email type: {type(email)}")
+    print(f"   Email length: {len(email)}")
+    print(f"   Email stripped: '{email.strip()}'")
     
     # check if the user exist or not 
-    user_existence:User_DB= await user_service.get_user_by_email(email,session)
+    user_existence:User_DB = await user_service.get_user_by_email(email, session)
+    
+    print(f"   User found: {user_existence is not None}")
+    if user_existence:
+        print(f"   Found user: {user_existence.email}")
     
     if not user_existence:
         raise UserNotFound()
       
-    is_valid_password = verify_password(password,user_existence.password_hash) 
+    is_valid_password = verify_password(password, user_existence.password_hash) 
      
     if is_valid_password:
         
-         # here we create the tokne  for this user cause he prove is a correct one
-        Acess_Token = access_token(
-                            user_data={
-                                "email":email,
-                                "id":str(user_existence.id),
-                                "username":user_existence.username,
-                            },
-                            expire=access
-                        )
-        refresh_token = access_token(
-                            user_data={
-                                "email":email,
-                                "id":str(user_existence.id),
-                                "username":user_existence.username,
-                            },
-                            expire=refresh,
-                            refresh=True
-                        )  
-                        
-                        
-        return JSONResponse(
-                        content ={ "message":"you have login successfully",
-                                    "acess_token":Acess_Token,
-                                    "refresh_token":refresh_token,
-                                    "email":email,
-                                    "username":user_existence.username,
-                                    "user_id":str(user_existence.id)
-            
-                                    },
-                                status_code= 200)
+        # Create tokens
+        access_token_str = access_token(
+            user_data={
+                "email": email,
+                "id": str(user_existence.id),
+                "username": user_existence.username,
+            },
+            expire=access
+        )
         
-         
-
-                      
+        refresh_token_str = access_token(
+            user_data={
+                "email": email,
+                "id": str(user_existence.id),
+                "username": user_existence.username,
+            },
+            expire=refresh,
+            refresh=True
+        )  
+        
+        return JSONResponse(
+            content={
+                "message": "you have login successfully",
+                "access_token": access_token_str,
+                "refresh_token": refresh_token_str,
+                "email": email,
+                "username": user_existence.username,
+                "user_id": str(user_existence.id)
+            },
+            status_code=200
+        )
     else:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN
-                            , detail="Invalid Credentials")
-
+        raise InvalidCredentials()
 
 @auth_router.get('/me',response_model=UserInfo,
                     dependencies=[checkroler])
@@ -184,7 +190,7 @@ async def get_acces_by_refresh(token:dict=Depends(RefreshToken())):
         
         return JSONResponse(
                content ={
-                  "acess_token":new_access_token
+                  "access_token":new_access_token
              } )
     
     raise HTTPException(
@@ -258,7 +264,7 @@ async def confirm_password(passwords:Password_reset_Confirm
     data = password_reset_link.de_serializ_url(token,600)
     
     """check if this link is beeing sent again to prevent it from consuming resourse """
-    if check_blacklist(data['token_id']):
+    if await check_blacklist(data['token_id']):
         raise UserAlreadyVerify()
     
 

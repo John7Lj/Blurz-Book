@@ -1,0 +1,15 @@
+
+
+
+
+we have ::
+1 :: fastapi app  which is the primary prcess 
+
+2:: postgresql DB , which is the primary engine for our app 
+
+3:: Redis queue system for : token revoking , redis broker , backend result of celery
+
+4 : celery background process : which run in background in lazy threads and responsible for sending emails , processsing analaysis tasks, 
+image proccesing and notifications not real time 
+
+
