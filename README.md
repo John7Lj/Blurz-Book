@@ -58,10 +58,6 @@ blurz book system
    ├─ .pytest_cache
    │  ├─ CACHEDIR.TAG
    │  ├─ README.md
-   │  └─ v
-   │     └─ cache
-   │        ├─ lastfailed
-   │        └─ nodeids
    ├─ alembic.ini
    ├─ basic_components.txt
    ├─ build.txt
@@ -71,22 +67,6 @@ blurz book system
    │  ├─ env.py
    │  ├─ README
    │  ├─ script.py.mako
-   │  ├─ versions
-   │  │  ├─ 342a52d99602_upadted_field_added.py
-   │  │  ├─ 4298bab39311_add_role_to_users_table.py
-   │  │  ├─ 49a98af91da3_the_password_hash_sis_added.py
-   │  │  ├─ 61725abfaebd_init.py
-   │  │  ├─ 7b6a5294ddd9_review_model_has_been_added_to_the_.py
-   │  │  ├─ d3911aec1c4a_updating_book_table.py
-   │  │  └─ __pycache__
-   │  │     ├─ 342a52d99602_upadted_field_added.cpython-313.pyc
-   │  │     ├─ 4298bab39311_add_role_to_users_table.cpython-313.pyc
-   │  │     ├─ 49a98af91da3_the_password_hash_sis_added.cpython-313.pyc
-   │  │     ├─ 61725abfaebd_init.cpython-313.pyc
-   │  │     ├─ 7b6a5294ddd9_review_model_has_been_added_to_the_.cpython-313.pyc
-   │  │     └─ d3911aec1c4a_updating_book_table.cpython-313.pyc
-   │  └─ __pycache__
-   │     └─ env.cpython-313.pyc
    ├─ notes
    │  ├─ functions.py
    │  ├─ middleware.py
@@ -104,33 +84,11 @@ blurz book system
    │  │  ├─ service.py
    │  │  ├─ utils.py
    │  │  ├─ __init__.py
-   │  │  └─ __pycache__
-   │  │     ├─ dependencies.cpython-312.pyc
-   │  │     ├─ dependencies.cpython-313.pyc
-   │  │     ├─ routes.cpython-312.pyc
-   │  │     ├─ routes.cpython-313.pyc
-   │  │     ├─ schema.cpython-312.pyc
-   │  │     ├─ schema.cpython-313.pyc
-   │  │     ├─ service.cpython-312.pyc
-   │  │     ├─ service.cpython-313.pyc
-   │  │     ├─ utils.cpython-312.pyc
-   │  │     ├─ utils.cpython-313.pyc
-   │  │     ├─ __init__.cpython-312.pyc
-   │  │     └─ __init__.cpython-313.pyc
    │  ├─ book
    │  │  ├─ books_db.py
    │  │  ├─ routes.py
    │  │  ├─ schema.py
    │  │  ├─ service.py
-   │  │  └─ __pycache__
-   │  │     ├─ books_db.cpython-313.pyc
-   │  │     ├─ routes.cpython-312.pyc
-   │  │     ├─ routes.cpython-313.pyc
-   │  │     ├─ schema.cpython-312.pyc
-   │  │     ├─ schema.cpython-313.pyc
-   │  │     ├─ service.cpython-312.pyc
-   │  │     ├─ service.cpython-313.pyc
-   │  │     └─ __init__.cpython-313.pyc
    │  ├─ celery
    │  │  ├─ celery_config.py
    │  │  ├─ celery_tasks.py
@@ -143,17 +101,6 @@ blurz book system
    │  │  ├─ models.py
    │  │  ├─ redis.py
    │  │  ├─ __init__.py
-   │  │  └─ __pycache__
-   │  │     ├─ config.cpython-312.pyc
-   │  │     ├─ config.cpython-313.pyc
-   │  │     ├─ main.cpython-312.pyc
-   │  │     ├─ main.cpython-313.pyc
-   │  │     ├─ models.cpython-312.pyc
-   │  │     ├─ models.cpython-313.pyc
-   │  │     ├─ redis.cpython-312.pyc
-   │  │     ├─ redis.cpython-313.pyc
-   │  │     ├─ __init__.cpython-312.pyc
-   │  │     └─ __init__.cpython-313.pyc
    │  ├─ err.py
    │  ├─ errors.py
    │  ├─ mailserver
@@ -165,48 +112,35 @@ blurz book system
    │  │  │  ├─ password_reset_link.html
    │  │  │  ├─ verify_message.html
    │  │  │  └─ welcome.html
-   │  │  └─ __pycache__
-   │  │     ├─ routes.cpython-312.pyc
-   │  │     ├─ routes.cpython-313.pyc
-   │  │     ├─ schema.cpython-312.pyc
-   │  │     ├─ schema.cpython-313.pyc
-   │  │     ├─ service.cpython-312.pyc
-   │  │     └─ service.cpython-313.pyc
    │  ├─ middleware.py
    │  ├─ reviews
    │  │  ├─ routes.py
    │  │  ├─ schema.py
    │  │  ├─ service.py
    │  │  ├─ __init__.py
-   │  │  └─ __pycache__
-   │  │     ├─ routes.cpython-312.pyc
-   │  │     ├─ routes.cpython-313.pyc
-   │  │     ├─ schema.cpython-312.pyc
-   │  │     ├─ schema.cpython-313.pyc
-   │  │     ├─ service.cpython-312.pyc
-   │  │     ├─ service.cpython-313.pyc
-   │  │     ├─ __init__.cpython-312.pyc
-   │  │     └─ __init__.cpython-313.pyc
    │  ├─ tests
    │  │  ├─ conftest.py
    │  │  ├─ test_auth.py
    │  │  ├─ __init__.py
-   │  │  └─ __pycache__
-   │  │     ├─ conftest.cpython-312-pytest-9.0.1.pyc
-   │  │     └─ __init__.cpython-312.pyc
-   │  ├─ __init__.py
-   │  └─ __pycache__
-   │     ├─ err.cpython-312.pyc
-   │     ├─ err.cpython-313.pyc
-   │     ├─ errors.cpython-312.pyc
-   │     ├─ errors.cpython-313.pyc
-   │     ├─ middleware.cpython-312.pyc
-   │     ├─ middleware.cpython-313.pyc
-   │     ├─ __init__.cpython-312.pyc
-   │     └─ __init__.cpython-313.pyc
-   └─ __pycache__
-      ├─ main.cpython-312.pyc
-      ├─ main.cpython-313.pyc
-      └─ __init__.cpython-313.pyc
 
-```
+
+this is the stucture of my book web app , this app is intended to show you how muliple services work togother like auth , DB engine ,
+celery (background processing), fastapi , email service and other services during the merge or updating the DB like aulumbic 
+
+
+
+Instructions for running this app (notice this instructuions for windows) ::
+server , DB , celery and env variables ::
+
+first server :: 
+1:go to the server folder by commmand line or powershell: cd server
+2:you must have installed python v12 then create and activate python environment to isolate the packages from in the machine by: python -m venv .venv
+then actiavte by :.venv\Scripts\activate.bat
+3:installing depedencies by : pip install -r requirements.txt
+4:the final step for server running is uvicorn main:app --reload
+
+second DB
+1: you have to install postgresql then 
+
+
+
