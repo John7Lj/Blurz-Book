@@ -31,6 +31,15 @@ UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 ALLOWED_EXTENSIONS = {".pdf", ".epub", ".mobi", ".azw", ".azw3"}
 MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB
 
+# MIME types for proper file type recognition
+MIME_TYPES = {
+    "pdf": "application/pdf",
+    "epub": "application/epub+zip",
+    "mobi": "application/x-mobipocket-ebook",
+    "azw": "application/vnd.amazon.ebook",
+    "azw3": "application/vnd.amazon.ebook",
+}
+
 
 @book_router.get('/hello')  
 async def hi():
@@ -111,7 +120,15 @@ async def upload_ebook(
     session: AsyncSession = Depends(get_session),
     user_data: User = Depends(get_current_user)
 ):
-    # 1. Validate file type
+    # 1. Get the book and verify ownership FIRST (fail fast for unauthorized users)
+    book = await book_service.get_book(book_id, session)
+    if not book:
+        raise HTTPException(status_code=404, detail="Book not found")
+    
+    if str(book.user_id) != str(user_data.id):
+        raise HTTPException(status_code=403, detail="Not your book")
+    
+    # 2. Validate file type (quick check on filename)
     file_ext = Path(file.filename).suffix.lower()
     if file_ext not in ALLOWED_EXTENSIONS:
         raise HTTPException(
@@ -119,7 +136,7 @@ async def upload_ebook(
             detail=f"File type not allowed. Supported: {', '.join(ALLOWED_EXTENSIONS)}"
         )
     
-    # 2. Check file size
+    # 3. Check file size (now we process the file)
     file.file.seek(0, 2)  # Seek to end
     file_size = file.file.tell()
     file.file.seek(0)  # Reset to start
@@ -127,29 +144,17 @@ async def upload_ebook(
     if file_size > MAX_FILE_SIZE:
         raise HTTPException(status_code=400, detail="File too large (max 50MB)")
     
-    # 3. Get the book and verify ownership
-    book = await book_service.get_book(book_id, session)
-    if not book:
-        raise HTTPException(status_code=404, detail="Book not found")
-    
-    # Ensure user_id comparison is safe
-    if str(book.user_id) != str(user_data.id):
-        raise HTTPException(status_code=403, detail="Not your book")
-    
-    # 4. Generate unique filename
+    # 4. Generate unique filename and save
     unique_filename = f"{uuid.uuid4()}{file_ext}"
+    file_path = Path("uploads") / "ebooks" / unique_filename
     
-    UPLOAD_DIR = Path("uploads")
-
-    file_path = Path(UPLOAD_DIR) / "ebooks" / unique_filename
-    # 5. Save file to disk
     try:
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to save file: {str(e)}")
     
-    # 6. Update book record in DB
+    # 5. Update book record in DB
     book.file_path = str(file_path)
     book.file_size = file_size
     book.file_type = file_ext.lstrip('.')
@@ -186,5 +191,5 @@ async def download_ebook(
     return FileResponse(
         path=book.file_path,
         filename=f"{book.title}.{book.file_type}",
-        media_type="application/octet-stream"
+        media_type=MIME_TYPES.get(book.file_type, "application/octet-stream")
     )
