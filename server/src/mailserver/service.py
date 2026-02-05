@@ -1,11 +1,11 @@
-from fastapi_mail import ConnectionConfig,MessageType,MessageType,MessageSchema,fastmail,FastMail
+from fastapi_mail import ConnectionConfig, MessageType, MessageSchema, FastMail
 from src.db.config import config as Config
 from pathlib import Path
 from jinja2 import Template
 
-BASE_DIR= Path(__file__).resolve().parent
+BASE_DIR = Path(__file__).resolve().parent
 
-Mail_Config =  ConnectionConfig( 
+Mail_Config = ConnectionConfig( 
     MAIL_USERNAME=Config.MAIL_USERNAME,
     MAIL_PASSWORD=Config.MAIL_PASSWORD,
     MAIL_FROM=Config.MAIL_FROM,
@@ -19,9 +19,6 @@ Mail_Config =  ConnectionConfig(
     TEMPLATE_FOLDER=Path(BASE_DIR, "templates"),
 )
 
-
-
-
 mail = FastMail(config=Mail_Config)
 
 async def welcome_message(recepients:str):
@@ -33,10 +30,8 @@ async def welcome_message(recepients:str):
     message = MessageSchema(recipients=[recepients],subject='Welcome to Blurz_Book',subtype=MessageType.html ,body=html_content)
     return message
 
-
-
-
-def send_email(recepients: list[str], subject:str,html_message_path:str,data_variables: dict = None): 
+"""notice the data_variables paramater is responsible for replacing the values in the html file like links """
+def send_email(recepients: list[str], subject:str,html_message_path:str,data_variables:dict | None = None): 
     
     path_content = Path(BASE_DIR, "templates", html_message_path)
     

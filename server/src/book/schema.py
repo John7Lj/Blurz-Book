@@ -14,8 +14,13 @@ class Book(BaseModel):
     description:str
     language: str
     published_date: datetime
-    created_at: datetime
-    updated_at: datetime
+    created_at: datetime | None = None  # ✅ Made optional
+    updated_at: datetime | None = None  # ✅ Made optional
+    user_id: uuid.UUID | None = None
+    file_path: str | None = None
+    file_size: int | None = None
+    file_type: str | None = None
+
 
 
 class CreateBook(BaseModel):  

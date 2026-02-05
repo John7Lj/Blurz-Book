@@ -40,6 +40,12 @@ def custome_simple_middle(app:FastAPI):
     )
     
     
+    app.add_middleware(
+        TrustedHostMiddleware ,
+        allowed_hosts=['*'],
+
+    )
+    
     
         
         

@@ -1,3 +1,5 @@
+   
+        
 from fastapi.security import HTTPBearer
 from fastapi import status,Request,Depends
 from fastapi.exceptions import HTTPException
@@ -67,16 +69,30 @@ class RefreshToken(BearerToken):
 
 
 
-async def get_current_user(token:dict=Depends(AccessTokenBearer())
-                           ,session:AsyncSession=Depends(get_session)) ->object:
+async def get_current_user(token: dict = Depends(AccessTokenBearer()),
+                           session: AsyncSession = Depends(get_session)) -> object:
     
     email = token['user']['email']
     try:
-        return await User_Service().get_user_by_email(email,session)
+        user = await User_Service().get_user_by_email(email, session)
         
-    except Exception as e :
-        logging.exception(f'ther was an error or maybe this user has been deleted  from the database:{e}')
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
         
+        return user
+        
+    except HTTPException:
+        raise  # Re-raise HTTP exceptions
+        
+    except Exception as e:
+        logging.exception(f'Error fetching user: {e}')
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to fetch user"
+        )
  
 class CheckRoler :
     def __init__ (self,allowd_rloes:list[str]):
@@ -92,11 +108,3 @@ class CheckRoler :
                 return True
             raise InsufficientPermission()
         
-        
-        
-
-
-
-
-
-

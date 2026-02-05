@@ -10,6 +10,7 @@ from src.errors import register_error_handlers
 from src.err import creation_exceptions
 from fastapi.responses import JSONResponse
 from src.middleware import custome_simple_middle
+from src.db.redis import check_redis_connection
 
 @asynccontextmanager # this IS A dicorator act like class function that excute a fuctions before that happen and ecxute a function after an evernt
 async def life_span(app:FastAPI):
@@ -18,7 +19,8 @@ async def life_span(app:FastAPI):
  print("the server has been started")
  # this is a async
  await init_db()
- 
+ await check_redis_connection()
+
  yield #this word seperate that when the server start before it will run first ,
  #after it run when the server will be stoppped the instruction excute
  print("the server has been stopped")
@@ -30,7 +32,7 @@ app = FastAPI(version=version,title="Blurz Book service",
               lifespan=life_span,
               redoc_url=f"/api/{version}/redocs",
               docs_url=f"/api/{version}/docs",
-              contact={"email":"ffliuyh@gmail.com"},
+              contact={"email":"ffkiuyh@gmail.com"},
                           
  ) 
 
@@ -38,8 +40,6 @@ app = FastAPI(version=version,title="Blurz Book service",
 
 """this is exceptions registers """
 creation_exceptions(app)
-
-
 custome_simple_middle(app)
 
 

@@ -55,14 +55,14 @@ class User_Service:
         
         update_data_dict = update_data.model_dump()
         
-        user_exist = self.get_user_by_email(email,session)
+        user_exist = await self.get_user_by_email(email,session)
         
         if not user_exist:
             raise UserAlreadyExists()
         for key,value in update_data_dict.items():
             setattr(user_exist,key,value)
             
-        session.commit()
+        await session.commit()
         await session.refresh(user_exist)
         
         

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from src.db.main import get_session
 from .service import User_Service
-from .schema import Create_User as Create_User_Model, User,Login_User,UserInfo,Password_Reset,Password_reset_Confirm
+from .schema import Create_User as Create_User_Model, User,Login_User,UserInfo,Password_Reset,Password_reset_Confirm, ChangePassword
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlalchemy.exc import IntegrityError
 from .utils import access_token,verify_password,CreationSafeLink,generate_hashed_password
@@ -37,9 +37,11 @@ access = timedelta(minutes=config.access_token_expiary)
                   status_code=status.HTTP_201_CREATED,
                   )
 async def create_user(
-    user_data: Create_User_Model, 
+    user_data: Create_User_Model
+    , 
     session: AsyncSession = Depends(get_session)
-):
+                   ):
+
     email = user_data.email
     is_existed = await user_service.user_exist(email, session)
     
@@ -55,15 +57,39 @@ async def create_user(
         
         data = {"link":link}
         
-        send_email( rec=[email],
-                            sub='verify email',
-                            data_var=data,
-                            html_path='verify_message.html')# the result is a message that sent to the user wiht link
+        bg_send_mail.delay(rec=[email], sub='verify email', html_path='verify_message.html', data_var=data) # the result is a message that sent to the user wiht link
       
       
         return new_user
     except IntegrityError:
         raise UserAlreadyExists()
+
+
+
+
+"""verify the URL to check is valid"""  
+@auth_router.get("/verify/{token}")
+
+async def activation_user(token:str,session:AsyncSession=Depends(get_session)):
+    
+    data = email_verification_link.de_serializ_url(token)
+    
+    if await check_blacklist(data['token_id']):
+        raise UserAlreadyVerify()
+    
+    email = data['email']
+    if not email:
+        raise VerificationError()
+    
+    await user_service.activation_user(email,session)
+    
+    await add_to_blacklist(data['token_id'],exp=1600)
+
+    return JSONResponse(
+            content={"message": "Account verified successfully"},
+            status_code=status.HTTP_200_OK,
+        )    
+
 
 
 @auth_router.post('/resend_verify_link')
@@ -81,36 +107,9 @@ async def crtate_url_vreification(email:Password_Reset,session: AsyncSession = D
         
         data = {"link":link}
         
-        bg_send_mail.delay(rec=[email],sub = 'verifyin mail',html_path='verify_message.html',data_var=data)
+        bg_send_mail.delay(rec=[email],sub = 'verifying mail',html_path='verify_message.html',data_var=data)
         
-     
 
-
-
-"""verify the URL to check is valid"""  
-@auth_router.get("/verify/{token}")
-
-async def activation_user(token:str,session:AsyncSession=Depends(get_session),accesstoken =Depends(AccessTokenBearer)):
-    
-    data = email_verification_link.de_serializ_url(token)
-    
-    if await check_blacklist(data['token_id']):
-        raise UserAlreadyVerify()
-    
-    email = data['email']
-    if not email:
-        raise VerificationError()
-    
-    await user_service.activation_user(email,session)
-    
-    await add_to_blacklist(accesstoken['jti'])
-
-    await add_to_blacklist(data['token_id'],exp=1600)
-
-    return JSONResponse(
-            content={"message": "Account verified successfully"},
-            status_code=status.HTTP_200_OK,
-        )    
 
 
 
@@ -231,7 +230,7 @@ async def logout(token:dict=Depends(AccessTokenBearer())):
     """ 
    # Notice this is for forgetting password and not in normal reset password 
 @auth_router.post('/password_reset')
-async def passsword_reset(Email:Password_Reset,session:AsyncSession=Depends(get_session),_=Depends(AccessTokenBearer())):
+async def passsword_reset(Email:Password_Reset,session:AsyncSession=Depends(get_session)):
     email = Email.email
     
     user_existence = await user_service.get_user_by_email(email,session)
@@ -240,32 +239,35 @@ async def passsword_reset(Email:Password_Reset,session:AsyncSession=Depends(get_
         raise UserNotFound()
     
     try:
-        
         token = password_reset_link.create_safe_url({"email":email})
-      
-        link = f'{config.domain}/auth/confirm_password/{token}'
+        
+        # Point to CLIENT URL
+        link = f'http://192.168.0.11:5173/reset-password/{token}'
         
         data = {"link":link}
         
-        bg_send_mail.delay(rec=email,
+        bg_send_mail.delay(rec=[email],
                             data_var=data,html_path='password_reset_link.html',
-                            sub = 'Reset Email Password')# the result is a message that sent to mail user wiht link
-      
+                            sub = 'Reset Email Password')
       
     except IntegrityError:
         raise UserAlreadyExists() 
     
-@auth_router.post("/confirm_password/{token}")
+    return JSONResponse(
+        content={"message": "If the email exists, a reset link has been sent."},
+        status_code=200
+    )
 
+
+@auth_router.post("/confirm_password/{token}")
 async def confirm_password(passwords:Password_reset_Confirm
-                           ,token:str,session:AsyncSession=Depends(get_session)
-                           ,access_token:dict=Depends(AccessTokenBearer()),):
+                           ,token:str,session:AsyncSession=Depends(get_session)):
     
     data = password_reset_link.de_serializ_url(token,600)
     
     """check if this link is beeing sent again to prevent it from consuming resourse """
     if await check_blacklist(data['token_id']):
-        raise UserAlreadyVerify()
+        raise PasswordAlreadyReset()
     
 
     if not passwords.new_password==passwords.confirm_password:
@@ -274,24 +276,47 @@ async def confirm_password(passwords:Password_reset_Confirm
     email = data['email']
     if not email:
         raise DataNotFound()
+
     try:
         user_exist =  await user_service.get_user_by_email(email,session)
         if not user_exist:
             raise UserNotFound()
     except IntegrityError:
         raise IntegrityError()
+
     new_password = generate_hashed_password(passwords.new_password)
     user_exist.password_hash = new_password
     await session.commit()
     await session.refresh(user_exist)
     
-    """if the user arrive hr this mean the user has successfully verify so we should block this ulr beeing used again"""
-    
-    await add_to_blacklist(access_token['jti'])
+    # Only blacklist the RESET token
     await add_to_blacklist(data['token_id'],exp=600)
-   
     
     return JSONResponse(
             content={"message": "Password has been updated successfully"},
             status_code=status.HTTP_200_OK,
         )  
+
+@auth_router.post('/change_password')
+async def change_password(
+    passwords: ChangePassword,
+    session: AsyncSession = Depends(get_session),
+    user_data: User = Depends(get_current_user)
+):
+    # 1. Verify current password
+    user = await user_service.get_user_by_email(user_data.email, session)
+    if not user:
+        raise UserNotFound()
+        
+    if not verify_password(passwords.current_password, user.password_hash):
+        raise HTTPException(status_code=400, detail="Incorrect current password")
+        
+    # 2. Hash new password and update
+    user.password_hash = generate_hashed_password(passwords.new_password)
+    
+    await session.commit()
+    
+    return JSONResponse(
+        content={"message": "Password updated successfully"},
+        status_code=200
+    )  

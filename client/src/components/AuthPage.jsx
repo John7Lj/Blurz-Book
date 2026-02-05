@@ -1,7 +1,9 @@
 import React, { useState } from "react";
+import { useNavigate } from 'react-router-dom';
 import Logo from './Logo';
 
 const AuthPage = ({ onLogin, onSignup, settings, error }) => {
+  const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
     email: '',
@@ -45,17 +47,15 @@ const AuthPage = ({ onLogin, onSignup, settings, error }) => {
         <div className="flex gap-2 mb-6">
           <button
             onClick={() => setIsLogin(true)}
-            className={`flex-1 py-2 rounded-lg font-medium transition-colors ${
-              isLogin ? 'bg-blue-500 text-white' : `${settings.darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'}`
-            }`}
+            className={`flex-1 py-2 rounded-lg font-medium transition-colors ${isLogin ? 'bg-blue-500 text-white' : `${settings.darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'}`
+              }`}
           >
             Sign In
           </button>
           <button
             onClick={() => setIsLogin(false)}
-            className={`flex-1 py-2 rounded-lg font-medium transition-colors ${
-              !isLogin ? 'bg-blue-500 text-white' : `${settings.darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'}`
-            }`}
+            className={`flex-1 py-2 rounded-lg font-medium transition-colors ${!isLogin ? 'bg-blue-500 text-white' : `${settings.darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'}`
+              }`}
           >
             Sign Up
           </button>
@@ -131,6 +131,17 @@ const AuthPage = ({ onLogin, onSignup, settings, error }) => {
             {isLogin ? 'Sign In' : 'Create Account'}
           </button>
         </form>
+
+        {isLogin && (
+          <div className="mt-4 text-center">
+            <button
+              onClick={() => navigate('/reset-password')}
+              className={`text-sm ${textSecondary} hover:${textClass} transition-colors`}
+            >
+              Forgot User/Password?
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -23,7 +23,6 @@ class settings(BaseSettings):
     MAIL_SSL_TLS: bool = False
     USE_CREDENTIALS: bool = True
     VALIDATE_CERTS: bool = True
-    TEMPLATE_FOLDER:str
     domain:str
     password_secrete_reset:str
     model_config = SettingsConfigDict (env_file=".env",  extra="ignore")

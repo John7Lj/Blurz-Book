@@ -8,7 +8,7 @@ import uuid
 class BookService:
     
     async def get_books(self, session: AsyncSession):
-        statement = select(BookModel).order_by(desc(BookModel.created_at))
+        statement = select(BookModel).order_by(desc(BookModel.updated_at))
         result = await session.exec(statement)
         return result.all()
     

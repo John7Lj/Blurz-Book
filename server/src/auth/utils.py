@@ -66,6 +66,9 @@ def decode_token(token_data:str):
     return None
 
 
+# this calss is intedent to create a safe url for the user to verify his email or reset his password 
+# and make the accounts real and active  
+
 
 class CreationSafeLink(URLSafeTimedSerializer):
     def __init__(self,secret_key:str,salt:str):

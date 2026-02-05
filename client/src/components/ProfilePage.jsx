@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { User, Mail, Calendar, BookOpen, Edit2, Save, X } from 'lucide-react';
+import api from '../services/api';
 
 const ProfilePage = ({ settings, user, onBack }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -28,6 +29,33 @@ const ProfilePage = ({ settings, user, onBack }) => {
       email: user?.email || '',
     });
     setIsEditing(false);
+  };
+
+  const [passwordData, setPasswordData] = useState({
+    current_password: '',
+    new_password: '',
+    confirm_password: ''
+  });
+
+  const handlePasswordUpdate = async () => {
+    if (passwordData.new_password !== passwordData.confirm_password) {
+      alert("New passwords don't match!");
+      return;
+    }
+
+    try {
+      await api.post('/auth/change_password', {
+        current_password: passwordData.current_password,
+        new_password: passwordData.new_password
+      });
+      alert('Password updated successfully!');
+      setPasswordData({ current_password: '', new_password: '', confirm_password: '' });
+    } catch (error) {
+      const errorMsg = error.response?.data?.detail?.message ||
+        error.response?.data?.detail ||
+        error.message;
+      alert(`Error updating password: ${errorMsg}`);
+    }
   };
 
   return (
@@ -217,6 +245,8 @@ const ProfilePage = ({ settings, user, onBack }) => {
             </label>
             <input
               type="password"
+              value={passwordData.current_password}
+              onChange={(e) => setPasswordData({ ...passwordData, current_password: e.target.value })}
               className={`w-full px-4 py-2 rounded-lg ${settings.darkMode ? 'bg-gray-700 text-white' : 'bg-gray-50 text-gray-900'} border ${borderClass} focus:ring-2 focus:ring-blue-500 outline-none`}
             />
           </div>
@@ -226,6 +256,8 @@ const ProfilePage = ({ settings, user, onBack }) => {
             </label>
             <input
               type="password"
+              value={passwordData.new_password}
+              onChange={(e) => setPasswordData({ ...passwordData, new_password: e.target.value })}
               className={`w-full px-4 py-2 rounded-lg ${settings.darkMode ? 'bg-gray-700 text-white' : 'bg-gray-50 text-gray-900'} border ${borderClass} focus:ring-2 focus:ring-blue-500 outline-none`}
             />
           </div>
@@ -235,10 +267,14 @@ const ProfilePage = ({ settings, user, onBack }) => {
             </label>
             <input
               type="password"
+              value={passwordData.confirm_password}
+              onChange={(e) => setPasswordData({ ...passwordData, confirm_password: e.target.value })}
               className={`w-full px-4 py-2 rounded-lg ${settings.darkMode ? 'bg-gray-700 text-white' : 'bg-gray-50 text-gray-900'} border ${borderClass} focus:ring-2 focus:ring-blue-500 outline-none`}
             />
           </div>
-          <button className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
+          <button
+            onClick={handlePasswordUpdate}
+            className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
             Update Password
           </button>
         </div>

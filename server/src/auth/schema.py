@@ -11,8 +11,9 @@ class User(BaseModel):
     first_name: str
     last_name: str
     is_verifed: bool 
-    created_at: datetime 
-    updated_at: datetime
+    created_at: datetime | None = None  # ✅ Made optional
+    updated_at: datetime | None = None  # ✅ Made optional
+
 
 
 
@@ -57,3 +58,7 @@ class Password_Reset(BaseModel):
 class Password_reset_Confirm(BaseModel):
     new_password:str=Field(min_length=8, max_length=72) 
     confirm_password:str=Field(min_length=8, max_length=72) 
+
+class ChangePassword(BaseModel):
+    current_password: str
+    new_password: str = Field(min_length=8, max_length=72)

@@ -1,67 +1,544 @@
-from sqlmodel.ext.asyncio.session import AsyncSession
-from .schema import create_book,update_book,book
-from sqlmodel import select,desc
-from models.book import Book
-class BOokService:
+.model small
+.stack 100h
+.data 
+
+message db 'the printed numbres from 1 to 100 here $' 
+line db 0ah,0dh, '$' 
+
+adding1 db 30h
+adding2 db 30h
+
+.code 
+
+main proc far 
+
+.startup 
+
+mov ah ,09
+lea dx , message
+int 21h
+
+mov cl, -1          ; start at -1 (so first INC makes it 0)
+
+outer_print:
+    inc cl          ; CL = 0..9
+    cmp cl, 10
+    jge exit        ; stop AFTER CL reaches 10
+
+    mov bl, 0
+
+inner_print:
+    mov ah, 02h
+
+    mov dl, adding1
+    add dl, cl      ; tens digit
+    int 21h
+
+    mov dl, adding2
+    add dl, bl      ; ones digit
+    int 21h
+
+    mov ah, 09h
+    lea dx, line
+    int 21h
+
+    inc bl
+    cmp bl, 10
+    jne inner_print
+
+    jmp outer_print
+
+exit:
+    mov ax, 4C00h
+    int 21h
+
+main endp  
+end main
+
+
+
+
+
+
+
+
+
+
+
+
+.model small
+.stack 100h
+                
+.data 
+
+message db 'the printed numbres from 1 to 100 here $' 
+line db 0ah,0dh, '$' 
+
+adding1 db 30h
+adding2 db 30h
+
+.code 
+
+main proc far 
+
+.startup 
+
+;;; the message
+
+mov ah ,09
+lea dx , message
+int 21h
+;;;;;; 
+
+;;; printing the numbrs 
+
+mov cl,	-1
+outer_print: 
+inc cl 
+mov bl ,0  
+
+cmp cl,10
+jge exit
+
+inner_print:
+
+
+mov ah,02
+mov dl , adding1
+add dl , cl 
+int 21h  
+  
+mov ah,02
+mov dl , adding2
+add dl , bl 
+int 21h 
+
+;; print space line
+
+mov ah ,09
+lea dx , line
+int 21h
+
+
+ inc bl
+cmp bl ,10
+jne inner_print
+jmp outer_print
+
+
+exit :
+    mov ax, 4C00h
+    int 21h  
+
+
+
+main endp  
+end main
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.model small
+
+.stack 100h
+
+.data 
+ table db 22,33,3h
+
+.code
+mov ax, @data
+mov ds, ax
+
+main PROC far 
+
+    mov al, table[2]  ; 44
+    add al, 30h       ; ASCII
+    mov dl, al 
+mov ah,02
+int 21h
+
+
+    mov ax, 4C00h
+    int 21h                            
+main endp 
+end main
+
+
+
+The issue is that you're using **both** `.startup` and `main PROC far` together, which causes a conflict. Let me show you two correct ways to fix this:
+
+**Option 1: Remove `.startup` and add proper initialization**
+
+```assembly
+.model small
+.stack 100h
+
+.data 
+ table db 22, 33, 'k'
+
+.code
+main PROC far 
+    mov ax, @data       ; Initialize data segment
+    mov ds, ax          ; DS must point to data segment
     
+    mov al, table[2]  
+    mov dl, al 
+    mov ah, 02
+    int 21h
     
-    async def get_books(self,session:AsyncSession):
-        statment = select(Book).order_by(desc(Book.created_at))
-        result =await session.exec(statment)
-        
-        return result.all()
+    mov ax, 4C00h
+    int 21h                            
+main endp 
+end main
+```
+
+**Option 2: Use `.startup` properly (remove `main PROC far`)**
+
+```assembly
+.model small
+.stack 100h
+
+.data 
+ table db 22, 33, 'k'
+
+.code
+.startup
+
+    mov al, table[2]  
+    mov dl, al 
+    mov ah, 02
+    int 21h
+
+.exit
+end
+```
+
+$
+
+@
+
+#
+
+%
+
+&
+
+*
+
+%
+
+
+.model small
+.stack 100h
+
+.data
+message  db 0Dh,0Ah,'plz enter digit $',0Dh,0Ah
+message2 db 0Dh,0Ah,'you enter $',0Dh,0Ah
+
+.code
+main PROC
+    mov ax,@data
+    mov ds,ax
+
+    lea dx, message
+    mov ah, 09h
+    int 21h            ; print "plz enter digit"
+
+    mov ah, 01h
+    int 21h            ; AL = ASCII char typed, e.g. '5' (35h)
+
+    lea dx, message2
+    mov ah, 09h
+    int 21h            ; print "you enter "
+
+    mov dl, al         ; DL = ASCII digit (already correct)
+    mov ah, 02h
+    int 21h            ; print the single character
+
+    mov ax, 4C00h
+    int 21h            ; exit
+main ENDP
+end main
+
+
+
+
+
+
+
+
+
+
+-===================
+
+
+print two digits :::
+
+
+-==========================
+
+.model small
+.stack 100h
+      
+
+.data
+message  db 0Dh,0Ah,'plz enter two digit $',0Dh,0Ah
+message2 db 0Dh,0Ah,'you enter $',0Dh,0Ah 
+
+arr db 0,0
+
+.code  
+
+
+main PROC far 
+   .startup   
+
+ mov dx,offset message 
+   
+    mov ah, 09
+    int 21h
+                
+      
+
+mov cx , 2 ; size of array 
+mov bx , 0
+enter_digits:
+
+mov ah,01h  
+int 21h
+         
+
+mov arr[bx],al 
+inc bx 
+dec cx
+cmp cx , 0
+jne enter_digits
+
+
+mov dx,offset message2
+   
+  mov ah, 09
+  int 21h
+                
+   
+mov bx ,0  
+mov cx , 2
+display:
+  mov dl,arr[bx]   
+    mov ah, 02
+    int 21h  
+inc bx
+dec cx
+cmp cx , 0
+
+jne display            
     
 
-
-    async def get_book(self, book_id: str, session: AsyncSession):
-        try:
-            statement = select(Book).where(Book.id == book_id)
-            result = await session.exec(statement)
-            book = result.first()
-            
-            if not book:
-                # Nothing found
-                raise ValueError(f"Book with ID {book_id} not found")
-            
-            return book
-
-        except Exception as e:
-            print(f"Error retrieving book: {e}")
-            return None
-    
-    
-    async def create_book(self,book_data:create_book,session:AsyncSession):
-        book_data_dict = book_data.model_dump()
-        new_book = Book(
-            **book_data_dict
-        )
-        
-        
-        session.add(new_book)
-        await session.commit()
-        return new_book
-    
-    async def update_book(self, book_id: str, book_data: update_book, session: AsyncSession):
-        try:
-            get_the_book = await self.get_book(book_id, session)
-
-            if get_the_book is not None:
-                book_data_dict = book_data.model_dump(exclude_unset=True)
-
-                for key, value in book_data_dict.items():
-                    setattr(get_the_book, key, value)
-
-                await session.commit()
-                await session.refresh(get_the_book)
-                return get_the_book
-            else:
-                return None
-
-        except Exception as e:
-            print(f"There was an error when updating this book: {e}")
-            return None
+.exit                         
+main endp 
+end main
 
 
-    async def delete_book(self,book_id:book,session:AsyncSession):
-        pass   
-    
+
+
+
+-=======================
+
+jump 
+
+
+
+-=======================
+
+
+
+JE , JZ	Jump if Equal (=).
+Jump if Zero.	ZF = 1	JNE, JNZ
+JNE , JNZ	Jump if Not Equal (<>).
+Jump if Not Zero.	ZF = 0	JE, JZ
+JA , JNBE	Jump if Above (>).
+Jump if Not Below or Equal (not <=).	CF = 0
+and
+ZF = 0	JNA, JBE
+JB , JNAE, JC	Jump if Below (<).
+Jump if Not Above or Equal (not >=).
+Jump if Carry.	CF = 1	JNB, JAE, JNC
+JAE , JNB, JNC	Jump if Above or Equal (>=).
+Jump if Not Below (not <).
+Jump if Not Carry.	CF = 0	JNAE, JB
+JBE , JNA	Jump if Below or Equal (<=).
+Jump if Not Above (not >).	CF = 1
+or
+ZF = 1	JNBE, JA
+
+
+
+
+
+
+
+
+
+
+
+
+.model small
+.stack 100h
+
+.data 
+
+message db 'the printed numbres from 1 to 100 here $' 
+line db 0ah,0dh, '$' 
+
+adding1 db 30h
+adding2 db 30h
+
+.code 
+
+main proc far 
+.startup 
+
+mov ah ,09
+lea dx , message
+int 21h
+
+mov cl, -1       ; start from -1 so first INC makes it 0
+
+outer_print: 
+    inc cl
+    mov bl ,0  
+
+    cmp cl,10
+    je exit
+
+inner_print:
+
+    mov ah,02
+    mov dl , adding1
+    add dl , cl 
+    int 21h  
+
+    mov ah,02
+    mov dl , adding2
+    add dl , bl 
+    int 21h 
+
+    mov ah ,09
+    lea dx , line
+    int 21h
+
+    inc bl
+    cmp bl ,10
+    jne inner_print
+
+    ; automatic fall-through into next iteration
+    jmp outer_print
+
+exit:
+    mov ax, 4C00h
+    int 21h  
+
+main endp
+end main
+
+
+
+
+
+
+.model small
+.stack 100h
+
+.data 
+
+message db 'the printed numbres from 1 to 100 here $' 
+line db 0ah,0dh, '$' 
+
+adding1 db 30h
+adding2 db 30h
+
+.code 
+
+
+main proc far 
+
+.startup 
+
+;;; the message
+
+mov ah ,09
+lea dx , message
+int 21h
+;;;;;; 
+
+
+
+;;; printing the numbrs 
+
+mov cl,	-1
+outer_print: 
+mov dl ,0
+
+inc cl 
+mov bl ,0  
+
+cmp cl,10
+je exit
+
+inner_print:
+
+
+mov ah,02
+mov dl , adding1
+add dl , cl 
+int 21h  
+  
+mov ah,02
+mov dl , adding2
+add dl , bl 
+int 21h 
+
+;; print space line
+
+mov ah ,09
+lea dx , line
+int 21h
+
+
+ inc bl
+cmp bl ,10
+jne inner_print
+jmp outer_print
+
+
+
+
+  
+exit :
+    mov ax, 4C00h
+    int 21h  
+
+
+
+main endp
