@@ -7,3 +7,8 @@ migration/versions/__pycache__
 first lesson
 client/node_modules
 client/.env
+server/.venv/
+.venv/
+*.pyd
+server/uploads/
+.venv
