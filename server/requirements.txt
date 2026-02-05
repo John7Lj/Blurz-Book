@@ -16,7 +16,7 @@ asgiref
 pydantic-settings
 
 flower
-
+asyncpg
 pytest
 pytest-asyncio
 pytest-cov 
