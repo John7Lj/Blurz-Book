@@ -174,6 +174,24 @@ The mobile app provides a native Android/iOS experience with the same functional
    ```
    > **Note:** Use your machine's local IP address (not `localhost`) so the mobile device can access the server.
 
+### 6️⃣ Network Configuration (Crucial for Mobile)
+
+Since the mobile app runs on a physical device, it needs permission to access your local development server.
+
+#### 1. Android Network Security
+The project includes a custom Expo Config Plugin (`plugins/withAndroidNetworkSecurityConfig.js`) that automatically:
+- Configures Android to allow **cleartext (HTTP) traffic** to your local IP.
+- You don't need to do anything manually for this; it's applied during the build.
+
+#### 2. Windows Firewall (Inbound Rules)
+Your computer's firewall may block the mobile device from connecting to the server. We have provided a script to fix this.
+
+**Run this command in PowerShell as Administrator:**
+```powershell
+Set-ExecutionPolicy Bypass -Scope Process -Force; & "scripts/allow_firewall.ps1"
+```
+*This opens Port 8000 for inbound TCP traffic.*
+
 #### Running the Mobile App
 
 **Start the Development Server:**
