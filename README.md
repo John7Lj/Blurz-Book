@@ -1,8 +1,4 @@
-![WhatsApp Image 2026-02-17 at 15 09 22](https://github.com/user-attachments/assets/3d4d7469-9bcd-4288-b8aa-26cec250fe03)
-![WhatsApp Image 2026-02-17 at 15 09 23](https://github.com/user-attachments/assets/deb447c6-4049-4019-8a14-98cc320adde6)
-![WhatsApp Image 2026-02-17 at 15 09 23 (1)](https://github.com/user-attachments/assets/30501665-6c30-4346-abda-181cabcb4110)
-![WhatsApp Image 2026-02-17 at 15 09 24](https://github.com/user-attachments/assets/a741e5f2-3dc5-480a-b123-1b06debc390c)
-![WhatsApp Image 2026-02-17 at 15 09 24 (1)](https://github.com/user-attachments/assets/2a043c85-b70c-448b-9f9d-c5f7d9adfef1)
+
 # 📚 Blurz Book System
 
 A full-stack book management web application built with a FastAPI server and React client. This system demonstrates modern web architecture including Authentication, Database management, Background tasks (Celery/Redis), and Email services.
@@ -370,4 +366,8 @@ cd mobile-blurz
 npm install
 npx expo install --check
 ```
-
+![WhatsApp Image 2026-02-17 at 15 09 22](https://github.com/user-attachments/assets/3d4d7469-9bcd-4288-b8aa-26cec250fe03)
+![WhatsApp Image 2026-02-17 at 15 09 23](https://github.com/user-attachments/assets/deb447c6-4049-4019-8a14-98cc320adde6)
+![WhatsApp Image 2026-02-17 at 15 09 23 (1)](https://github.com/user-attachments/assets/30501665-6c30-4346-abda-181cabcb4110)
+![WhatsApp Image 2026-02-17 at 15 09 24](https://github.com/user-attachments/assets/a741e5f2-3dc5-480a-b123-1b06debc390c)
+![WhatsApp Image 2026-02-17 at 15 09 24 (1)](https://github.com/user-attachments/assets/2a043c85-b70c-448b-9f9d-c5f7d9adfef1)
